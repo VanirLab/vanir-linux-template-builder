@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Setup env variables
+
+SCRIPTSDIR=$TEMPLATE_SCRIPTS
+if [ ! -d "$SCRIPTSDIR" ]; then
+    echo "Scripts directory $SCRIPTSDIR does not exists"
+    exit 1
+fi
+
+if [ -z "$CACHEDIR" ]; then
+    CACHEDIR=cache_$DIST
+fi
+
+export SCRIPTSDIR CACHEDIR

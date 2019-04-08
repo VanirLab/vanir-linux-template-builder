@@ -1,0 +1,32 @@
+#!/bin/sh
+NAME=$1
+
+set -e
+
+if [ x$NAME = x ] ; then
+    echo "usage $0 <template_name>"
+    exit 1
+fi
+
+# handle appmenus whitelists from DispVM build
+if [ -d vanirized_images/$NAME/untrusted_appmenus ]; then
+    srcdir="vanirized_images/$NAME/untrusted_appmenus"
+    mkdir -p appmenus-$$
+    rm -f appmenus
+    ln -s appmenus-$$ appmenus
+    for f in whitelisted-appmenus.list vm-whitelisted-appmenus.list netvm-whitelisted-appmenus.list; do
+        grep '^[a-zA-Z0-9.()_-]\+.desktop$' $srcdir/$f > appmenus/$f
+    done
+    trap "rm -rf appmenus-$$ appmenus" EXIT
+fi
+
+rpmbuild --target noarch \
+         --define "template_name $NAME" \
+         --define "DIST $DIST" \
+         --define "_topdir $PWD/rpmbuild" \
+         --define "_tmppath $PWD/rpmbuild/tmp" \
+         -bb templates.spec
+
+if [ "0$DISCARD_PREPARED_IMAGE" -eq "1" ]; then
+    rm -rf "vanirized_images/$NAME"
+fi
